@@ -1,0 +1,14 @@
+body {
+    width: 350px;
+    height: 500px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sticker-buttons {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+}
