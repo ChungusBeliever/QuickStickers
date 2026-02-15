@@ -21,6 +21,15 @@ export class Sticker {
         setTimeout(() => this.button.style.outline = "none", 100);
     }
 
+    private remove() {
+        if (confirm("Delete?")) {
+            this.button.remove();
+
+            const event = new CustomEvent('stickerDeleted', {detail: this.imageUrl});
+            window.dispatchEvent(event);
+        }
+    }
+
     public getButton(): HTMLButtonElement {
         return this.button;
     }
@@ -35,6 +44,10 @@ export class Sticker {
         this.button.addEventListener('click', () => {
             this.copyToClipboard();
         });
+        this.button.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.remove();
+        })
     }
 
     // helper function to create image

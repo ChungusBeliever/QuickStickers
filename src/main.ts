@@ -2,14 +2,11 @@ import { Sticker } from "./Sticker";
 
 const addButton = document.querySelector<HTMLButtonElement>('#add-sticker-btn');
 const stickerContainer = document.querySelector<HTMLDivElement>('#sticker-container');
-const stickerList: Sticker[] = [];
 
 // Adds a new sticker to the list of stickers and the div element.
 // Also removes the no sticker message if its there
 function addSticker() {
-    if (stickerContainer == null) {
-        return;
-    }
+    if (!stickerContainer) return; // null check
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -20,7 +17,6 @@ function addSticker() {
             const file = fileInput.files[0];
             const imageUrl = URL.createObjectURL(file);
             const newButton = new Sticker(imageUrl);
-            stickerList.push(newButton);
 
             stickerContainer.appendChild(newButton.getButton());
             stickerContainer.scrollTop = stickerContainer.scrollHeight;
@@ -29,6 +25,19 @@ function addSticker() {
             removeNoStickerMessage(stickerContainer);
         }
     })
+}
+
+// removes the most recently added sticker
+function removeSticker(event: any) {
+    chrome.storage.local.get(['myStickers'], (result) => {
+        let list = result.myStickers as string[] || [];
+        list = list.filter(item => item != event.detail);
+        chrome.storage.local.set({myStickers: list});
+
+        if (list.length == 0) {
+            createNoStickerMessage();
+        }
+    });
 }
 
 // saves sticker to browser storage
@@ -58,6 +67,7 @@ function loadStickers() {
     })
 }
 
+// helper to convert file to base64 string (for saving stickers)
 function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -69,12 +79,10 @@ function fileToBase64(file: File): Promise<string> {
 
 // helper function create the no sticker message
 function createNoStickerMessage() {
-    if (stickerList.length == 0) {
-        const noStickerMessage: HTMLSpanElement = document.createElement('span');
-        noStickerMessage.innerText = 'No stickers available. Add one';
-        noStickerMessage.id = 'no-sticker-message';
-        stickerContainer?.appendChild(noStickerMessage);
-    }
+    const noStickerMessage: HTMLSpanElement = document.createElement('span');
+    noStickerMessage.innerText = 'No stickers available. Add one';
+    noStickerMessage.id = 'no-sticker-message';
+    stickerContainer?.appendChild(noStickerMessage);
 }
 
 // helper function remove the no sticker message
@@ -90,4 +98,9 @@ function removeNoStickerMessage(stickerContainer: HTMLDivElement) {
 addButton?.addEventListener('click', () => {
     addSticker();
 })
+
+window.addEventListener('stickerDeleted', (event: any) => {
+    removeSticker(event);
+})
+
 loadStickers();
