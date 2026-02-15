@@ -44,6 +44,10 @@ function loadStickers() {
     createNoStickerMessage();
 }
 
+
+
+
+
 addButton?.addEventListener('click', () => {
     addSticker();
 })

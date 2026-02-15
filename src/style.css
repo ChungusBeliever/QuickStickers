@@ -4,11 +4,25 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
+
 
 .sticker-buttons {
     flex: 1;
     overflow-y: auto;
     display: flex;
+    gap: 15px;
+    padding: 20px;
     flex-wrap: wrap;
+    align-content: flex-start;
+    box-sizing: border-box;
+    scrollbar-gutter: stable;
+    justify-content: center;
+}
+
+.sticker {
+    width: 85px;
+    height: 85px;
 }
