@@ -1,10 +1,11 @@
+import { loadStickers, removeSticker, saveSticker } from "./persistence/PersistenceUtil";
 import { Sticker } from "./Sticker";
 
 const addButton = document.querySelector<HTMLButtonElement>('#add-sticker-btn');
 const stickerContainer = document.querySelector<HTMLDivElement>('#sticker-container');
 
-// Adds a new sticker to the list of stickers and the div element.
-// Also removes the no sticker message if its there
+// adds a new sticker to the list of stickers and the div element.
+// also removes the no sticker message if its there
 function addSticker() {
     if (!stickerContainer) return; // null check
 
@@ -27,56 +28,6 @@ function addSticker() {
     })
 }
 
-// removes the most recently added sticker
-function removeSticker(event: any) {
-    chrome.storage.local.get(['myStickers'], (result) => {
-        let list = result.myStickers as string[] || [];
-        list = list.filter(item => item != event.detail);
-        chrome.storage.local.set({myStickers: list});
-
-        if (list.length == 0) {
-            createNoStickerMessage();
-        }
-    });
-}
-
-// saves sticker to browser storage
-async function saveSticker(file: File) {
-    const base64 = await fileToBase64(file);
-    chrome.storage.local.get(['myStickers'], (result) => {
-        const list = result.myStickers as string[] || [];
-        list.push(base64);
-        chrome.storage.local.set({myStickers: list});
-    })
-}
-
-// loads in the stickers from browser storage. 
-// creates a no sticker message if theres no stickers to be loaded
-function loadStickers() {
-    createNoStickerMessage();
-    chrome.storage.local.get(['myStickers'], (result) => {
-        const savedStickers = result.myStickers as string[] || [];
-        savedStickers.forEach((data: string) => {
-            const tempSticker = new Sticker(data);
-            stickerContainer?.appendChild(tempSticker.getButton());
-
-            if (stickerContainer != null) {
-                removeNoStickerMessage(stickerContainer);
-            }
-        })
-    })
-}
-
-// helper to convert file to base64 string (for saving stickers)
-function fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
-}
-
 // helper function create the no sticker message
 function createNoStickerMessage() {
     const noStickerMessage: HTMLSpanElement = document.createElement('span');
@@ -94,13 +45,27 @@ function removeNoStickerMessage(stickerContainer: HTMLDivElement) {
 }
 
 
+// the function that first runs
+// sets up event listeners and loading in the stickers
+function startUp() {
+    // button event listener
+    addButton?.addEventListener('click', () => {
+        addSticker();
+    })
 
-addButton?.addEventListener('click', () => {
-    addSticker();
-})
+    // window event listener
+    window.addEventListener('stickerDeleted', (event: any) => {
+        removeSticker(event, () => {
+            createNoStickerMessage();
+        });
+    })
 
-window.addEventListener('stickerDeleted', (event: any) => {
-    removeSticker(event);
-})
+    // loading in stickers
+    createNoStickerMessage();
+    if (stickerContainer != null) {
+        loadStickers(stickerContainer);
+        removeNoStickerMessage(stickerContainer);
+    }
+}
 
-loadStickers();
+startUp();
