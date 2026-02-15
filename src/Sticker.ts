@@ -4,19 +4,21 @@ export class Sticker {
 
     constructor(imageUrl: string) {
         this.button = document.createElement('button');
-        this.button.className = 'sticker';
         this.imageUrl = imageUrl;
+        this.initializeButton();
+        this.createImage();
+    }
 
-        const img = document.createElement('img');
-        img.src = this.imageUrl;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-        this.button.appendChild(img);
+    // copies the image to the clipboard
+    private async copyToClipboard() {
+        const response = await fetch(this.imageUrl);
+        const blob = await response.blob();
 
-        this.button.addEventListener('click', () => {
-            this.copyToClipboard();
-        })
+        const item = new ClipboardItem({ [blob.type]: blob });
+
+        await navigator.clipboard.write([item]);
+        this.button.style.outline = "2px solid green";
+        setTimeout(() => this.button.style.outline = "none", 100);
     }
 
     public getButton(): HTMLButtonElement {
@@ -27,14 +29,21 @@ export class Sticker {
         return this.imageUrl;
     }
 
-    private async copyToClipboard() {
-        const response = await fetch(this.imageUrl);
-        const blob = await response.blob();
+    // helper function to initialize button
+    private initializeButton() {
+        this.button.className = 'sticker';
+        this.button.addEventListener('click', () => {
+            this.copyToClipboard();
+        });
+    }
 
-        const item = new ClipboardItem({ [blob.type]: blob });
-
-        await navigator.clipboard.write([item]);
-        this.button.style.outline = "2px solid green";
-        setTimeout(() => this.button.style.outline = "none", 100);
+    // helper function to create image
+    private createImage() {
+        const img = document.createElement('img');
+        img.src = this.imageUrl;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        this.button.appendChild(img);
     }
 }

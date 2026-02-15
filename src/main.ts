@@ -24,9 +24,47 @@ function addSticker() {
 
             stickerContainer.appendChild(newButton.getButton());
             stickerContainer.scrollTop = stickerContainer.scrollHeight;
+
+            saveSticker(file);
             removeNoStickerMessage(stickerContainer);
         }
     })
+}
+
+// saves sticker to browser storage
+async function saveSticker(file: File) {
+    const base64 = await fileToBase64(file);
+    chrome.storage.local.get(['myStickers'], (result) => {
+        const list = result.myStickers as string[] || [];
+        list.push(base64);
+        chrome.storage.local.set({myStickers: list});
+    })
+}
+
+// loads in the stickers from browser storage. 
+// creates a no sticker message if theres no stickers to be loaded
+function loadStickers() {
+    createNoStickerMessage();
+    chrome.storage.local.get(['myStickers'], (result) => {
+        const savedStickers = result.myStickers as string[] || [];
+        savedStickers.forEach((data: string) => {
+            const tempSticker = new Sticker(data);
+            stickerContainer?.appendChild(tempSticker.getButton());
+
+            if (stickerContainer != null) {
+                removeNoStickerMessage(stickerContainer);
+            }
+        })
+    })
+}
+
+function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
 }
 
 // helper function create the no sticker message
@@ -46,14 +84,6 @@ function removeNoStickerMessage(stickerContainer: HTMLDivElement) {
         stickerContainer?.removeChild(noStickerMessageMessage);
     }
 }
-
-
-// loads in the stickers. Creates a no sticker message if theres no stickers to be loaded
-function loadStickers() {
-    createNoStickerMessage();
-}
-
-
 
 
 
