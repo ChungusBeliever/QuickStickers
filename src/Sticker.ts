@@ -13,6 +13,10 @@ export class Sticker {
         img.style.height = '100%';
         img.style.objectFit = 'contain';
         this.button.appendChild(img);
+
+        this.button.addEventListener('click', () => {
+            this.copyToClipboard();
+        })
     }
 
     public getButton(): HTMLButtonElement {
@@ -21,5 +25,16 @@ export class Sticker {
 
     public getImageUrl(): String {
         return this.imageUrl;
+    }
+
+    private async copyToClipboard() {
+        const response = await fetch(this.imageUrl);
+        const blob = await response.blob();
+
+        const item = new ClipboardItem({ [blob.type]: blob });
+
+        await navigator.clipboard.write([item]);
+        this.button.style.outline = "2px solid green";
+        setTimeout(() => this.button.style.outline = "none", 100);
     }
 }
