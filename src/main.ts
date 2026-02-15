@@ -11,13 +11,22 @@ function addSticker() {
         return;
     }
 
-    removeNoStickerMessage(stickerContainer);
-    
-    const newButton = new Sticker;
-    stickerList.push(newButton);
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.click();
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            const imageUrl = URL.createObjectURL(file);
+            const newButton = new Sticker(imageUrl);
+            stickerList.push(newButton);
 
-    stickerContainer.appendChild(newButton.getButton());
-    stickerContainer.scrollTop = stickerContainer.scrollHeight;
+            stickerContainer.appendChild(newButton.getButton());
+            stickerContainer.scrollTop = stickerContainer.scrollHeight;
+            removeNoStickerMessage(stickerContainer);
+        }
+    })
 }
 
 // helper function create the no sticker message
