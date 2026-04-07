@@ -9,5 +9,7 @@ Chrome extension for accessing your stickers right on your browser. Add your fav
  - Click on a sticker to copy it to your clipboard. Then you can use it ANYWHERE YOU WANT!!!
 🙏🙏🙏
 
-## build instructions
-- Run `npm run build` 🐴🐴🐴
+## here is how it looks like
+<img src = "public/images/example.png">
+
+Images from @almarts27 on Instagram
